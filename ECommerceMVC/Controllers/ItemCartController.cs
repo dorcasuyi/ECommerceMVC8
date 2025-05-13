@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Http;
 
 namespace ECommerceMVC.Controllers
 {
+    [Route("ItemCart")]
     public class ItemCartController : Controller
     {
         private readonly ICartService _cartService;
@@ -20,13 +21,16 @@ namespace ECommerceMVC.Controllers
         public async Task<IActionResult> Index()
         {
             var userId = HttpContext.Session.GetInt32("UserId");
-        if (userId == null) return RedirectToAction("Login", "Auth");
-
-        var cartItems = await _cartService.GetUserCartAsync(userId.Value);
-        return View(cartItems);
+            if (userId == null) 
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+            var cartItems = await _cartService.GetUserCartAsync(userId.Value);
+            return View(cartItems);
         }
 
-        [HttpPost]
+        // POST: ItemCart/Add (via AJAX)
+        [HttpPost("Add")]
         public async Task<IActionResult> Add([FromBody] ItemCart item)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -41,6 +45,8 @@ namespace ECommerceMVC.Controllers
             return Json(new { success = result });
         }
 
+        // POST: ItemCart/Add (via Form submission)
+        [HttpPost("AddFromForm")]
         public async Task<IActionResult> Add([FromForm] int productId)
         {
             var userId = HttpContext.Session.GetInt32("UserId");
@@ -68,6 +74,8 @@ namespace ECommerceMVC.Controllers
         //    await _cartService.RemoveFromCartAsync(cartId);
         //    return RedirectToAction("Index");
         //}
+
+        // DELETE: ItemCart/Remove/{id}
         [HttpDelete("Remove/{id}")]
         public async Task<IActionResult> Remove(int id)
         {
