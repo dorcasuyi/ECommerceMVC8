@@ -1,0 +1,76 @@
+﻿@model List<ECommerceMVC.Models.ItemCart>
+@{
+    ViewData["Title"] = "My Cart";
+    decimal total = 0;
+}
+
+<h2>My Shopping Cart</h2>
+
+@if (!Model.Any())
+{
+    <div class="alert alert-info">
+        Your cart is empty.
+    </div>
+}
+else
+{
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Description</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Subtotal</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                var subtotal = item.Product.Price * item.Quantity;
+                total += subtotal;
+
+                <tr id="cart-item-@item.Id">
+                    <td>@item.Product.Name</td>
+                    <td>@item.Product.Description</td>
+                    <td>$@item.Product.Price.ToString("F2")</td>
+                    <td>@item.Quantity</td>
+                    <td>$@subtotal.ToString("F2")</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm remove-from-cart-btn" data-cart-id="@item.Id">Remove</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <h4>Total: $@total.ToString("F2")</h4>
+
+    <button class="btn btn-success">Checkout</button>
+}
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(".remove-from-cart-btn").click(function () {
+                var cartId = $(this).data("cart-id");
+                $.ajax({
+                    url: '/ItemCart/Remove/' + cartId,
+                    type: 'DELETE',
+                    success: function (response) {
+                        if (response.success) {
+                            toastr.success("Item removed from cart.");
+                            $("#cart-item-" + cartId).remove();
+                        } else {
+                            toastr.error("Failed to remove item.");
+                        }
+                    },
+                    error: function () {
+                        toastr.error("An error occurred while trying to remove the item.");
+                    }
+                });
+            });
+        });
+    </script>
+}

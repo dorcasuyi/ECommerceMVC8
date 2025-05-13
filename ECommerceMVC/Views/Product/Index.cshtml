@@ -1,0 +1,77 @@
+﻿@model IEnumerable<ECommerceMVC.Models.Product>
+@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    ViewData["Title"] = "Products";
+    var userId = HttpContextAccessor.HttpContext.Session.GetInt32("UserId");
+}
+
+<h2>Available Products</h2>
+
+@if (userId != null)
+{
+    <div class="mb-3">
+        <a class="btn btn-outline-primary" asp-controller="ItemCart" asp-action="Index">🛒 View My Cart</a>
+    </div>
+}
+else
+{
+    <div class="mb-3">
+        <a class="btn btn-outline-secondary" asp-controller="Auth" asp-action="Login">🔐 Login to Add to Cart</a>
+    </div>
+}
+
+<div class="row">
+    @foreach (var product in Model)
+    {
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h5 class="card-title">@product.Name</h5>
+                    <p class="card-text">@product.Description</p>
+                    <p class="card-text"><strong>$@product.Price.ToString("F2")</strong></p>
+                    
+                    @if (userId != null)
+                    {
+                        <div class="input-group mb-2">
+                            <input type="number" min="1" value="1" class="form-control quantity-input" data-product-id="@product.Id" />
+                            <div class="input-group-append">
+                                <button class="btn btn-success add-to-cart-btn" data-product-id="@product.Id">Add to Cart</button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="btn btn-sm btn-warning" asp-controller="Auth" asp-action="Login">Login to Add</a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $(".add-to-cart-btn").click(function () {
+                var productId = $(this).data("product-id");
+                var quantity = $(".quantity-input[data-product-id='" + productId + "']").val();
+                
+                $.ajax({
+                    url: '@Url.Action("Add", "ItemCart")',
+                    type: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({ ProductId: productId, Quantity: parseInt(quantity) }),
+                    success: function (response) {
+                        if (response.success) {
+                            alert("Item added to cart.");
+                        } else {
+                            alert("Failed to add item: " + response.message);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

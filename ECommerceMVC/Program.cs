@@ -1,7 +1,35 @@
+using Microsoft.EntityFrameworkCore;
+using ECommerceMVC.Data;
+using Microsoft.AspNetCore.Cors.Infrastructure;
+using ECommerceMVC.Repository.IRepository;
+using ECommerceMVC.Repository;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+builder.Services.AddScoped<IProductService, ProductService>();
+builder.Services.AddScoped<ICartService, CartService>();
+builder.Services.AddScoped<IUserService, UserService>();
+
+
+// Register session services
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // Optional
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
+});
+
+
+
+builder.Services.AddHttpContextAccessor();
+
 
 var app = builder.Build();
 
@@ -18,10 +46,12 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseSession(); // <-- Make sure this is here and before UseAuthorization
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Product}/{action=Index}/{id?}");
 
 app.Run();
