@@ -1,1 +1,49 @@
-.vs/ 
+## Build Folders
+bin/
+obj/
+
+## User-specific files
+*.user
+*.userosscache
+*.suo
+
+## Logs
+*.log
+
+## OS generated files
+.DS_Store
+Thumbs.db
+
+## Visual Studio
+.vs/
+.vscode/
+
+## Configuration files
+appsettings.json
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+
+## Entity Framework
+*.sqlite
+*.db
+*.mdf
+*.ldf
+
+## Publish output
+wwwroot/lib/
+publish/
+dist/
+
+## Packages
+*.nupkg
+packages/
+*.snupkg
+
+## JetBrains Rider
+.idea/
+
+## Others
+*.bak
+*.tmp
+*.cache
